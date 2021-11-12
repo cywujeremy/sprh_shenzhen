@@ -1,18 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
+from utils.scraper import htmlIntoSoup
 import openpyxl as op
-import time
-import random
-
-
-def htmlIntoSoup(url):
-    time.sleep(random.random() * 6)
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
-    response = requests.get(url=url, headers=headers)
-    soup = BeautifulSoup(response.text, 'lxml')
-    return soup
-
 
 def getUrl(soup):
     urlsoup = soup.find(class_='xf_sh_list_b').ul.contents

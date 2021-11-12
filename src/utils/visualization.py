@@ -1,13 +1,25 @@
 import folium
 import pandas as pd
+import time
 
-
-def sprh_plot():
-    sprh_data = pd.read_csv("D:/OneDriveLocal/OneDrive/学习/毕业/毕业论文/2020.02深圳/楼盘汇总.csv")
-    sprh = folium.map.FeatureGroup()
-    for lat, lng, sprh_mark in zip(sprh_data.LAT, sprh_data.LNG, sprh_data.SPRH):
-        if sprh_mark == 1:
-            sprh.add_child(
+def gen_map_binary_categories(lat_series, lng_series, flag_series, 
+                              output_path=f'./{time.localtime()}.html',
+                              center=[22.6, 114.083333], zoom_start=11):
+    
+    """plot points of binary categories on the base map with folium
+    
+    Args:
+        lat_series (pandas.Series): the series of latitude
+        lng_series (pandas.Series): the series of longitude
+        flag_series (pandas.Series): the series of flags
+    
+    """
+    
+    map = folium.map.FeatureGroup()
+    for lat, lng, flag in zip(lat_series, lng_series, flag_series):
+        
+        if flag == 1:
+            map.add_child(
                 folium.Circle(
                     [lat, lng],
                     radius=5,
@@ -17,8 +29,9 @@ def sprh_plot():
                     fill_opacity=0.5
                 )
             )
-        elif sprh_mark == 0:
-            sprh.add_child(
+            
+        elif flag == 0:
+            map.add_child(
                 folium.Circle(
                     [lat, lng],
                     radius=5,
@@ -28,13 +41,22 @@ def sprh_plot():
                     fill_opacity=0.5
                 )
             )
-    sz_map = folium.Map(location=[22.6, 114.083333], zoom_start=11)
-    sz_map.add_child(sprh)
-    sz_map.save('D:/OneDriveLocal/OneDrive/学习/毕业/毕业论文/2020.02深圳/分布图/01.html')
+            
+    base_map = folium.Map(location=center, zoom_start=zoom_start)
+    base_map.add_child(map)
+    base_map.save(output_path)
 
 
-def public_service_plot():
-    ps_data = pd.read_csv("D:/OneDriveLocal/OneDrive/学习/毕业/毕业论文/2020.02深圳/xls/公共服务POI汇总.csv")
+def public_service_plot(output_path):
+    
+    """(DEPRECATED) plot points of multiple categories on the base map with folium
+    
+    # TODO: may need to redesign to avoid hard-coding and increase flexibility to 
+            un-defined number of categories.
+    
+    """
+    
+    ps_data = pd.read_csv(output_path)
     ps = folium.map.FeatureGroup()
     for lat, lng, type_ in zip(ps_data.lat, ps_data.lng, ps_data.type):
         if type_ == 1:
@@ -94,7 +116,7 @@ def public_service_plot():
             )
     sz_map = folium.Map(location=[22.6, 114.083333], zoom_start=11)
     sz_map.add_child(ps)
-    sz_map.save('D:/OneDriveLocal/OneDrive/学习/毕业/毕业论文/2020.02深圳/分布图/public_services_0413.html')
+    sz_map.save(output_path)
 
 if __name__ == '__main__':
     public_service_plot()

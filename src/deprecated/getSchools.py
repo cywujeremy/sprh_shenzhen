@@ -1,17 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
+from utils.scraper import htmlIntoSoup
 import openpyxl as op
-import re
-
-
-def htmlIntoSoup(url):
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'}
-    response = requests.get(url=url, headers=headers)
-    response.encoding = 'GB2312'
-    processedtexts = response.text.replace('\n', '')
-    soup = BeautifulSoup(processedtexts, 'lxml')
-    return soup
 
 
 def getUrl(soup):

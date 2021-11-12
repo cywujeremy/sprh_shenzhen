@@ -15,9 +15,5 @@ def identify_attr():
         i += 1
     wb.save("D:/OneDriveLocal/OneDrive/学习/毕业/毕业论文/2020.02深圳/深圳市小产权房_房屋性质.xlsx")
 
-
-
-
-
 if __name__ == '__main__':
     identify_attr()
