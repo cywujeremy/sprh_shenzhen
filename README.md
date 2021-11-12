@@ -6,11 +6,11 @@ This repository contains the source code and data for the SPRH research project.
 
 ```
 ├─data
-|	└─main.csv
+|   └─main.csv
 ├─do
-|	└─dofile_0730.do
+|   └─dofile_0730.do
 └─src
-	├─__init__.py
+    ├─__init__.py
     ├─utils
     |	├─__init__.py
     |	├─geocode.py
