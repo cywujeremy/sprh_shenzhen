@@ -1,0 +1,45 @@
+---
+title: "sprh_analytics"
+author: "chengyu"
+date: "2/14/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Small Property Right Housing Analytics
+```{r}
+# Import libraries
+
+library(dplyr)
+library(ggplot2)
+library(stargazer)
+library(plm)
+```
+
+```{r}
+data <- read.csv("data/main.csv")
+data
+```
+```{r}
+data$nearpubschlevel <- factor(data$nearpubschlevel, levels = c("普通", "区一级", "市一级", "省一级"))
+```
+
+```{r}
+linreg <- lm(avgunitprice ~ factor(formal) + totalfloor + sez + fee +
+                            factor(nearpubschlevel) + nearparkdist + nearcbddist +
+                            nearhospdist +nearmetrodist,
+             data=data)
+summary(linreg)
+```
+
+```{r}
+data %>%
+  group_by(nearpubschlevel) %>%
+  summarise(count = n()) %>%
+  ggplot() +
+  geom_bar(aes(x = nearpubschlevel, y = count), stat = "identity")
+```
+
