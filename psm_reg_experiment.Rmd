@@ -1,0 +1,66 @@
+---
+title: "psm_regression_experiment"
+author: "chengyu"
+date: "2021/11/16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+#install.packages("data.table")
+library(data.table)
+#install.packages("stargazer")
+library(stargazer)
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("ggthemes")
+library(ggthemes)
+#install.packages("tidyverse")
+library(tidyverse)
+#install.packages("pwr")
+library(pwr)
+#install.packages("plm")
+library(plm)
+library(MatchIt)
+```
+
+```{r}
+data = read.csv('main.csv', encoding = "UTF-8")
+data
+```
+
+
+```{r}
+data %>%
+  ggplot(aes(log(avgunitprice), color = factor(formal), fill = factor(formal))) +
+  geom_density(alpha = 0.1) + 
+  scale_color_discrete(name = "Type", labels = c("Formal", "Informal")) +
+  scale_fill_discrete(name = "Type", labels = c("Formal", "Informal")) +
+  theme_bw() +
+  xlab("Log of average unit price") +
+  ggtitle("Price distribution of the sample properties") +
+  xlim(7.5, 13)
+```
+
+## Propensity Score Matching
+
+```{r}
+match <- matchit(formal ~ lng + lat + nearcbddist,
+                 data = data,
+                 method = "nearest",
+                 caliper = 0.05)
+summary(match)
+```
+
+```{r}
+psm_lm <- plm(avgunitprice ~ formal,
+              data = data,
+              model = "pooling")
+summary(psm_lm)
+```
+
