@@ -17,14 +17,62 @@ library(dplyr)
 library(ggplot2)
 library(stargazer)
 library(plm)
+library(data.table)
+library(ggthemes)
+library(pwr)
+library(MatchIt)
 ```
 
 ```{r}
+# preparing the data
 data <- read.csv("data/main.csv")
 data
 ```
 ```{r}
-data$nearpubschlevel <- factor(data$nearpubschlevel, levels = c("普通", "区一级", "市一级", "省一级"))
+data <- data %>%
+  mutate(formal = ifelse(formal == 0, "yes", "no")) %>%
+  mutate(nearpubschlevel = recode_factor(nearpubschlevel, 
+                                         "普通" = "regular",
+                                         "区一级" = "district",
+                                         "市一级" = "city",
+                                         "省一级" = "province")) %>%
+  mutate(nearpubschlevel = recode_factor(nearprischlevel, 
+                                         "普通" = "regular",
+                                         "区一级" = "district",
+                                         "市一级" = "city",
+                                         "省一级" = "province")) %>%
+  filter(bldgtype != "" & bldgtype != "#N/A") %>%
+  mutate(bldgtype = ifelse(bldgtype == "小高" | bldgtype == "小高高层", "小高层", bldgtype)) %>%
+  mutate(bldgtype = recode_factor(bldgtype,
+                                  "多层" = "low-rise",
+                                  "小高层" = "mid-rise",
+                                  "高层" = "high-rise"))
+data
+```
+```{r}
+# reorder factor variables
+data$nearpubschlevel <- factor(data$nearpubschlevel, levels = c("regular", "district", "city", "province"))
+data$nearprischlevel <- factor(data$nearpubschlevel, levels = c("regular", "district", "city", "province"))
+data$bldgtype <- factor(data$nearpubschlevel, levels = c("low-rise", "mid-rise", "high-rise"))
+```
+
+
+```{r}
+data %>%
+  ggplot(aes(log(avgunitprice), color = factor(formal), fill = factor(formal))) +
+  geom_density(alpha = 0.1) + 
+  scale_color_discrete(name = "Type", labels = c("Informal", "Formal")) +
+  scale_fill_discrete(name = "Type", labels = c("Informal", "Formal")) +
+  theme_bw() +
+  xlab("Log of average unit price") +
+  ggtitle("Price distribution of the sample properties") +
+  xlim(7.5, 13)
+```
+
+```{r}
+data$nearpubschlevel <- factor(data$nearpubschlevel, levels = c("regular", "district", "city", "province"))
+data$nearprischlevel <- factor(data$nearpubschlevel, levels = c("regular", "district", "city", "province"))
+data$bldgtype <- factor(data$nearpubschlevel, levels = c("low-rise", "mid-rise", "high-rise"))
 ```
 
 ```{r}
@@ -43,3 +91,19 @@ data %>%
   geom_bar(aes(x = nearpubschlevel, y = count), stat = "identity")
 ```
 
+## Propensity Score Matching
+
+```{r}
+match <- matchit(formal ~ lng + lat + nearcbddist,
+                 data = data,
+                 method = "nearest",
+                 caliper = 0.05)
+summary(match)
+```
+
+```{r}
+psm_lm <- plm(avgunitprice ~ formal,
+              data = data,
+              model = "pooling")
+summary(psm_lm)
+```
